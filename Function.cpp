@@ -21,26 +21,23 @@ void Trie::DocumentInsert()
 				fin >> s;
 				for (int m = 0; m < int(s.size()); m++)
 				{
-					if (s[m] >= 58 && s[m] <= 64 || s[m] >= 33 && s[m] <= 47 || s[m] >= 91 && s[m] <= 96)
+					if (s[m] >= 58 && s[m] <= 64 || s[m] >= 33 && s[m] <= 47|| s[m] == -111 || s[m] == '"' || s[m] == -110 || s[m] == -109 || s[m] == -108)
 					{
-						s[m] = 0;
-						for (int n = m; n < int(s.size()); n++)
-							s[n] = s[n + 1];
+						s.erase(m, 1);
 					}
 						if (s[m] <= 'Z' && s[m] >= 'A')
 						s[m] -= ('Z' - 'z');
 				}
-				Insert(s, y, i);
+				Insert(s, i*1000+y);
 			}
 		}
 	}
 }
 
-void Trie::Insert(string s, int k, int p)//k la stt document cua tu dc insert
+void Trie::Insert(string s, int k)//k la stt document cua tu dc insert
 {
 	Node* cur = root;
 	int t;
-	cur->docGroup.push_back(p);
 	for (int i = 0; i<int(s.size()); i++)
 	{
 		t = 97;
