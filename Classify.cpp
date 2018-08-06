@@ -16,16 +16,16 @@ void EliminateStopwords(string& str, Trie stopwords, Trie T) {
 
 void classifyQuery(string str, Trie T)
 {
-	if (str.find('AND') != -1) {
+	if (str.find('AND') != str.npos) {
 		cout << "AndSearching(str, T)\n";
 	}
-	else if (str.find('OR') != -1) {
+	else if (str.find('OR') != str.npos) {
 		cout << "OrSearching(str, T)\n";
 	}
-	else if (str.find('#') != -1) {
+	else if (str.find('#') != str.npos) {
 		cout << "HashtagSearching\n";
 	}
-	else if (str.find('*') != -1) {
+	else if (str.find('*') != str.npos) {
 		cout << "WildcardSearching\n";
 	}
 	else if (str.find('$') != -1) {
