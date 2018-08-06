@@ -28,7 +28,7 @@ void classifyQuery(string str, Trie T)
 	else if (str.find("*") != str.npos) {
 		cout << "WildcardSearching\n";
 	}
-	else if (str.find("$') != str.npos) {
+	else if (str.find("$") != str.npos) {
 		cout << "PriceSearching\n";
 	}
 }
