@@ -15,21 +15,26 @@ void Trie::DocumentInsert()
 				file << "Group0" << i << "News" << y << ".txt";
 			a = file.str();
 			fin.open(a);
+			file.str(string());
 			string s;
 			while (fin.good())
 			{
 				fin >> s;
 				for (int m = 0; m < int(s.size()); m++)
 				{
-					if (s[m] >= 58 && s[m] <= 64 || s[m] >= 33 && s[m] <= 47|| s[m] == -111 || s[m] == '"' || s[m] == -110 || s[m] == -109 || s[m] == -108)
+					if (s[m] >= 58 && s[m] <= 64 || s[m] >= 33 && s[m] <= 47|| s[m] == -111 || s[m] == '"' || s[m] == -110 || s[m] == -109 || s[m] == -108 || s[m] == '’' || s[m] == '“' || s[m] == ',')
 					{
 						s.erase(m, 1);
+						m = 0;
 					}
 						if (s[m] <= 'Z' && s[m] >= 'A')
 						s[m] -= ('Z' - 'z');
 				}
 				Insert(s, i*1000+y);
+				cout << s << " ";
 			}
+			fin.close();
+			cout << endl << endl;
 		}
 	}
 }
