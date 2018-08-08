@@ -1,4 +1,23 @@
 #include "TrieLib.h"
+size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+    size_t pos = txt.find( ch );
+    size_t initialPos = 0;
+    strs.clear();
+
+    // Decompose statement
+    while( pos != std::string::npos ) {
+        strs.push_back( txt.substr( initialPos, pos - initialPos ) );
+        initialPos = pos + 1;
+
+        pos = txt.find( ch, initialPos );
+    }
+
+    // Add the last one
+    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+    return strs.size();
+}
 void Trie::Insert(string s,int k)//k la stt document cua tu dc insert
 {
     Node* cur=root;
@@ -61,6 +80,7 @@ void Trie::DocumentInsert()
 			while (fin.good())
 			{
 				fin >> s;
+				fout<<s<<endl;
 				for (m = 0; m < int(s.size()); m++)
 				{
 				    if (s[m] <= 'Z' && s[m] >= 'A')
@@ -73,92 +93,81 @@ void Trie::DocumentInsert()
                     else m++;
                 }
 				Insert(s, i*1000+y);
-				fout<<s<<endl;
 			}
 			fin.close();
 		}
 	}
 }
-int getword(string s,string word)
-{
-	for(int i=0;i<s.size();i++)
-	{
-		if (s[i]==word[0])
-		{
-			int l=word.size();
-			int k;
-			for(k=0;k<l;k++)
-			{
-				if (s[i+k]!=word[k])
-					break;
-			}
-			if (k==l)
-				return i;
-		}
-
-	}
-	return -1;
-}
 void Trie::Print(string word,int g)
 {
-	ifstream fin;
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    int C=20,Q=0,m,color;
+    ofstream fout;
+    fout.open("ans.txt");
 	stringstream ss;
 	ss << g%1000;
 	stringstream temp2;
 	temp2<<g/1000;
 	string t;
-	if(g%1000>=10)
+	if(g%100>=10)
 		t="Group"+ss.str();
 	else
 		t="Group0"+ss.str();
 	if (g/1000>=10)
 		t+="News" +temp2.str()+ ".txt";
 	else
-		t+="News0" +temp2.str()+ ".txt";
+		t+="News0"+temp2.str()+ ".txt";
+	ifstream fin;
 	string s;
-	string temp;
 	fin.open(t);
-	while(!fin.eof())
-	{
-		getline(fin,temp);
-		s+=temp;
-	}
-	string s2=s;
-	for(int m=0;m<s2.size();m++)
-	{
-		if (s2[m] <= 'Z' && s2[m] >= 'A')
-						s2[m] -= ('Z' - 'z');
-	}
+	t="";
+	//---------------------------
+	vector <string> input;
+	split(word,input,' ');
+    while (fin.good()&&C>0)
+    {
+        color=0;
+        fin >> t;
+        s=t;
+        for (m = 0; m < int(s.size()); m++)
+				{
+				    if (s[m] <= 'Z' && s[m] >= 'A')
+						s[m] -= ('Z' - 'z');
+				}
+        m=0;
+        while (m<int(s.size()))
+        {
+            if ((s[m]>'z'||s[m]<'a')&&(s[m]>'9'||s[m]<'0')&&s[m]!='$'&&s[m]!='#') s.erase(m,1);
+            else m++;
+        }
+        for (m=0;m<int(input.size());m++) if (s==input[m]) {Q=1;color=1;}
+        if (Q==1)
+        {
+            if (color==1) SetConsoleTextAttribute(hConsole, 4);
+            else SetConsoleTextAttribute(hConsole, 7);
+            cout<<t<<" ";
+            C--;
+        }
 
-	string tmp=".";
-	int k=getword(s2,word);
-	if (k !=-1)
-	{
+    }
+	fin.close();
+	fout.close();
+}
+void Search(string s,Trie T)
+{
+    int const p=2;
+    unordered_map <int,int> H;
+    vector <int> ans;
+    vector <string> input;
+    vector <pair<int,int>> L;// docnum score
+    int i,j;
+    split(s,input,' ');
+    for (i=0;i<int(input.size());i++)
+    {
+        ans=T.Find(input[i]);ans.push_back(-1);
+        for (j=0;j<int(ans.size());j++)
+        if (H.find(ans[j])==H.end()) L.push_back(make_pair(ans[j],1));
+    }
+    for (i=0;i<int(L.size());i++) L[i].second=H[L[i].first];
 
-		int i=k;
-		while(i>0&&s2[i]!=tmp[0])
-			i--;
-
-	if(i>0)
-		i+=2;
-	else
-		i=0;
-	while(s2[i]!=tmp[0])
-	{
-		if(i!=k)
-		{
-		cout<<s2[i];
-		i++;
-		}
-		else
-		{
-			system("color 4");
-			int j=k;
-			for(j;j<word.size();j++)
-				cout<<s2[j];
-			i+=word.size();
-			system("color 7");
-		}
-	}
-	}
 }

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <unordered_map>
+#include<Windows.h>
+#include <algorithm>
 using namespace std;
 //-----------------Trie----------------------
 struct Node
