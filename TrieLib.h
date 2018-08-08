@@ -4,12 +4,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 using namespace std;
 //-----------------Trie----------------------
 struct Node
 {
     char value;
-    Node* Child[36]={0};
+    Node* Child[38]={0};
     vector <int> docNum;//So thu tu document
     Node(char x)
     {
@@ -24,5 +25,6 @@ class Trie
     void Insert(string s,int k);
     vector<int> Find(string s);
     void DocumentInsert();
+    void Print(string word,int g);
 };
 #endif // TRIELIB_H_INCLUDED
