@@ -150,7 +150,7 @@ void EliminateStopwords(string& str,Trie stopwords, Trie T) {
 	classifyQuery(str, T);
 }
 
-void classifyQuery(string str, Trie T)
+void classifyQuery(string& str, Trie T)
 {
 	if (str.find("and") != str.npos) {
 		str.erase(str.find("and"), 4);
