@@ -273,11 +273,6 @@ void Trie::Print(string word,int g,int isStrict)
     {
         color=0;
         fin >> t;
-        if (isP==0)
-        {
-            if (int(pre.size())>P) pre.pop();
-            pre.push(t);
-        }
         s=t;
         for (m = 0; m < int(s.size()); m++)
 				{
@@ -290,18 +285,10 @@ void Trie::Print(string word,int g,int isStrict)
             if ((s[m]>'z'||s[m]<'a')&&(s[m]>'9'||s[m]<'0')&&s[m]!='$'&&s[m]!='#') s.erase(m,1);
             else m++;
         }
-        for (m=0;m<int(input.size());m++) if (s==input[m]) {Q=1;color=1;isP=1;}
-        if (Q==1)
+        for (m=0;m<int(input.size());m++) if (s==input[m]) {pre.push(t);}
+        else while (!pre.empty()) pre.pop();
+        if (pre.size()==input.size()) {Q==1;color=1;}
         {
-            if (isP==1) while (pre.size()>1)
-            {
-                cout<<pre.front()<<" ";
-                pre.pop();
-            }
-            if (color==1) SetConsoleTextAttribute(hConsole, 4);
-            else SetConsoleTextAttribute(hConsole, 7);
-            cout<<t<<" ";
-            C--;
         }
     }
     cout<<endl;
