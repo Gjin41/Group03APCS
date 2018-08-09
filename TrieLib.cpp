@@ -1,4 +1,8 @@
 #include "TrieLib.h"
+bool cmp(pair<int,int> a,pair <int,int> b)
+{
+    return (a.second>b.second);
+}
 size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {
     size_t pos = txt.find( ch );
@@ -14,7 +18,7 @@ size_t split(const std::string &txt, std::vector<std::string> &strs, char ch)
     }
 
     // Add the last one
-    strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+    strs.push_back( txt.substr( initialPos, min( pos, txt.size() ) - initialPos + 1 ) );
 
     return strs.size();
 }
@@ -80,7 +84,6 @@ void Trie::DocumentInsert()
 			while (fin.good())
 			{
 				fin >> s;
-				fout<<s<<endl;
 				for (m = 0; m < int(s.size()); m++)
 				{
 				    if (s[m] <= 'Z' && s[m] >= 'A')
@@ -98,36 +101,144 @@ void Trie::DocumentInsert()
 		}
 	}
 }
-void Trie::Print(string word,int g)
+void Trie::StopwordTrie()
+{
+	ifstream fin;
+	fin.open("stopwords.txt");
+	string s;
+	int m;
+	while (fin.good())
+	{
+		fin >> s;
+		for (m = 0; m < int(s.size()); m++)
+		{
+			if (s[m] <= 'Z' && s[m] >= 'A')
+				s[m] -= ('Z' - 'z');
+		}
+		m = 0;
+		while (m<int(s.size()))
+		{
+			if ((s[m]>'z' || s[m]<'a') && (s[m]>'9' || s[m]<'0')) s.erase(m, 1);
+			else m++;
+		}
+		Insert(s, 0);
+	}
+	fin.close();
+}
+void MainMenu()
+{
+    system("CLS");
+	Trie T;
+	T.DocumentInsert();
+	Trie stopwords;
+	stopwords.StopwordTrie();
+	int choice;
+	cout << "1 - Search " << endl;
+	cout << "2 - Exit " << endl;
+	cin >> choice;
+	switch (choice) {
+	case 1: {
+		system("cls");
+		string str;
+		cout << "Please input what you want to search: ";
+		cin.ignore();
+		getline(cin, str);
+		EliminateStopwords(str, stopwords, T);
+		break;
+	}
+	case 2:
+		exit(0);
+		break;
+	}
+}
+
+void EliminateStopwords(string& str,Trie stopwords, Trie T) {
+	for (int i = 0; i < int(str.length()); i++) {
+		if (str[i] >= 65 && str[i] < 90)
+			str[i] = tolower(str[i]);
+	}
+	int start = 0;
+	string str1;
+	for (int i = 0; i < int(str.length()); i++) {
+		if (i == int(str.length()) - 1 || str[i + 1] == ' ') {
+			str1 = str.substr(start, i - start + 1);
+			if (stopwords.Find(str1).size() != 0) {
+				str.erase(start, i - start + 2);
+			}
+			else
+				start = i + 2;
+		}
+	}
+	classifyQuery(str, T);
+}
+void classifyQuery(string str, Trie T)
+{
+	if (str.find("and") != str.npos) {
+		str.erase(str.find("and"), 4);
+		cout << "AndSearching(str, T)";
+	}
+	else if (str.find("or") != str.npos) {
+		str.erase(str.find("or"), 3);
+		cout << "OrSearching(str, T)";
+	}
+	else if (str.find("#") != str.npos) {
+		Search(str,T,0);
+	}
+	else if (str.find("*") != str.npos) {
+        str.erase(str.find("and"), 2);
+		cout << "WildcardSearching";
+	}
+	else if (str.find("$") != str.npos) {
+		Search(str,T,0);
+	}
+	else if (str.find("\"") != str.npos){
+		cout << "ExactMatching";
+	}
+	else
+    {
+        Search(str,T,0);
+    }
+}
+void Trie::Print(string word,int g,int isStrict)
 {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    int C=20,Q=0,m,color;
+    SetConsoleTextAttribute(hConsole, 7);
+    int Q=0,m,color,isP=0;
+    int C=50,P=5;//changable
     ofstream fout;
     fout.open("ans.txt");
 	stringstream ss;
-	ss << g%1000;
+	ss << g/1000;
 	stringstream temp2;
-	temp2<<g/1000;
+	temp2<<g%1000;
 	string t;
-	if(g%100>=10)
+	if(g/1000>=10)
 		t="Group"+ss.str();
 	else
 		t="Group0"+ss.str();
-	if (g/1000>=10)
+	if (g%1000>=10)
 		t+="News" +temp2.str()+ ".txt";
 	else
 		t+="News0"+temp2.str()+ ".txt";
 	ifstream fin;
 	string s;
 	fin.open(t);
+	cout<<t<<endl;
 	t="";
-	//---------------------------
 	vector <string> input;
+	queue <string> pre;
 	split(word,input,' ');
+    if (isStrict==0)
+    {
     while (fin.good()&&C>0)
     {
         color=0;
         fin >> t;
+        if (isP==0)
+        {
+            if (int(pre.size())>P) pre.pop();
+            pre.push(t);
+        }
         s=t;
         for (m = 0; m < int(s.size()); m++)
 				{
@@ -140,20 +251,63 @@ void Trie::Print(string word,int g)
             if ((s[m]>'z'||s[m]<'a')&&(s[m]>'9'||s[m]<'0')&&s[m]!='$'&&s[m]!='#') s.erase(m,1);
             else m++;
         }
-        for (m=0;m<int(input.size());m++) if (s==input[m]) {Q=1;color=1;}
+        for (m=0;m<int(input.size());m++) if (s==input[m]) {Q=1;color=1;isP=1;}
         if (Q==1)
         {
+            if (isP==1) while (pre.size()>1)
+            {
+                cout<<pre.front()<<" ";
+                pre.pop();
+            }
             if (color==1) SetConsoleTextAttribute(hConsole, 4);
             else SetConsoleTextAttribute(hConsole, 7);
             cout<<t<<" ";
             C--;
         }
-
     }
-	fin.close();
-	fout.close();
+    cout<<endl;
+    }
+    else
+    {
+    while (fin.good()&&C>0)
+    {
+        color=0;
+        fin >> t;
+        if (isP==0)
+        {
+            if (int(pre.size())>P) pre.pop();
+            pre.push(t);
+        }
+        s=t;
+        for (m = 0; m < int(s.size()); m++)
+				{
+				    if (s[m] <= 'Z' && s[m] >= 'A')
+						s[m] -= ('Z' - 'z');
+				}
+        m=0;
+        while (m<int(s.size()))
+        {
+            if ((s[m]>'z'||s[m]<'a')&&(s[m]>'9'||s[m]<'0')&&s[m]!='$'&&s[m]!='#') s.erase(m,1);
+            else m++;
+        }
+        for (m=0;m<int(input.size());m++) if (s==input[m]) {Q=1;color=1;isP=1;}
+        if (Q==1)
+        {
+            if (isP==1) while (pre.size()>1)
+            {
+                cout<<pre.front()<<" ";
+                pre.pop();
+            }
+            if (color==1) SetConsoleTextAttribute(hConsole, 4);
+            else SetConsoleTextAttribute(hConsole, 7);
+            cout<<t<<" ";
+            C--;
+        }
+    }
+    cout<<endl;
+    }
 }
-void Search(string s,Trie T)
+void Search(string s,Trie T,int isStrict)
 {
     int const p=2;
     unordered_map <int,int> H;
@@ -165,9 +319,29 @@ void Search(string s,Trie T)
     for (i=0;i<int(input.size());i++)
     {
         ans=T.Find(input[i]);ans.push_back(-1);
+        //for (i=0;i<ans.size();i++) cout<<ans[i]<<endl;
         for (j=0;j<int(ans.size());j++)
-        if (H.find(ans[j])==H.end()) L.push_back(make_pair(ans[j],1));
+        {
+            if (H.find(ans[j])==H.end())
+            {
+                L.push_back(make_pair(ans[j],1));
+            }
+            if (ans[j]==ans[j+1]) H[ans[j]]+=1;
+            else H[ans[j]]+=p;
+        }
     }
+    H[-1]=-10;
     for (i=0;i<int(L.size());i++) L[i].second=H[L[i].first];
-
+    sort(L.begin(),L.end(),cmp);
+    for (i=0;i<int(L.size());i++) cout<<L[i].first<<" "<<L[i].second<<endl;
+    i=1;
+    while (i<=5&&i<int(L.size()))
+    {
+        T.Print(s,L[i-1].first,isStrict);
+        i++;
+    }
+    if (L.size()==1) cout<<"No result"<<endl;
+    cout<<"0.Menu"<<endl;
+    cin>>i;
+    MainMenu();
 }
