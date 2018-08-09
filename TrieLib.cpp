@@ -175,11 +175,11 @@ void classifyQuery(string str, Trie T)
 {
 	if (str.find("and") != str.npos) {
 		str.erase(str.find("and"), 4);
-		cout << "AndSearching(str, T)";
+		Search(str,T,0);
 	}
 	else if (str.find("or") != str.npos) {
 		str.erase(str.find("or"), 3);
-		cout << "OrSearching(str, T)";
+		Search(str,T,0);
 	}
 	else if (str.find("#") != str.npos) {
 		Search(str,T,0);
@@ -309,7 +309,7 @@ void Trie::Print(string word,int g,int isStrict)
 }
 void Search(string s,Trie T,int isStrict)
 {
-    int const p=2;
+    int const p=5;
     unordered_map <int,int> H;
     vector <int> ans;
     vector <string> input;
