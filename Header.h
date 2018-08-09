@@ -33,7 +33,7 @@ public:
 
 void MainMenu();
 void EliminateStopwords(string& str, Trie stopwords, Trie T);
-void classifyQuery(string str, Trie T);
+void classifyQuery(string str&, Trie T);
 //void AndSearching(string str, Trie T);
 //void OrSearching(string str, Trie T);
 
